@@ -1,0 +1,30 @@
+name: continuous-integration # nom qu'on veut
+
+on:
+  push:
+    branches-ignore: [ga-ignore-*]
+  pull_request:
+    branches-ignore: [ga-ignore-*]
+
+jobs: # étape qu'il fera
+    coding-style:
+        name: Run Banana
+        runs-on: ubuntu-latest
+        container:
+            image: ghcr.io/epitech/coding-style-checker:latest # run cette image du container
+        steps:
+          - name: Checkout GH repo
+            uses: actions/checkout@master # master -> dernière version ou v4 -> version4 POUR SAVOIR QUELLE VERSION BANANA
+
+          - name: Run coding-style checker
+            run: check.sh $(pwd) $(pwd) # run coding-style
+
+          - name: Report banana result
+            run: | #pipe pour dire qu'il y aura plusieurs lignes de run / NB_ERROR cat combiné avec wc -l pour savoir le nb de lignes
+                NB_ERROR=$(cat coding-style-reports.log | wc -l)
+                if [ $NB_ERROR -gt 0 ]; then
+                    ERROR=$(cat coding-style-reports.log)
+                    echo "::error title=$NB_ERROR errors found::$ERROR"
+                    exit 1
+                fi
+                exit 0
